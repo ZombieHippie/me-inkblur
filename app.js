@@ -8,6 +8,7 @@ var logger = require('morgan')
 var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
 var session = require('express-session')
+var markdown = require('./lib/md-middleware')
 
 var simpleRoute = require('./routes/')
 
@@ -24,8 +25,14 @@ app.use(cookieParser())
 app.use(session({
     secret: 'such secretz'
 }))
-app.use(express.static(path.join(__dirname, 'static')))
 
+app.use('/blog', markdown({
+    extend: function (req, res, html) {
+        res.render('inject', {inject:html, view:"blog"})
+    },
+    directory: './static/blog'
+}))
+app.use(express.static(path.join(__dirname, 'static')))
 app.use('/', simpleRoute)
 
 /// catch 404 and forward to error handler
